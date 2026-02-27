@@ -1,0 +1,69 @@
+#!/bin/bash
+
+#Fonction de vérification de l'éxistence de l'utilisateur
+verif_user () {
+read -p "Indiquez le nom de l'utilisateur : " USER
+echo ""
+while [[ ! $USER ]]
+do
+	read -p "Indiquez le nom de l'utilisateur : " USER
+done
+cat /etc/passwd | cut -d: -f1 | grep $USER > /dev/null 
+}
+
+#Fonction d'affichage du menu
+display_menu () {
+echo "==========Gestion des Utilisateurs==========="
+echo "1 - Ajouter un utilisateur"
+echo "2 - Suppprimer un utilisateur"
+echo "0 - Quitter"
+echo "============================================="
+echo ""
+read CHOICE
+}
+
+#Traitement du choix
+while true
+do
+display_menu
+case $CHOICE in
+	#Creation d'un user si il n'éxiste pas déja
+	1)
+		verif_user
+		if (( $? == 1 ))
+		then
+			sudo useradd -m $USER -p $(mkpasswd password)
+			echo "L'utilisateur $USER à été ajouté"
+			echo ""
+			continue
+		else
+			echo "L'utilisateur $USER éxiste déja."
+			echo ""
+			continue
+		fi
+		;;
+	#Supression d'un user si il éxiste
+	2)
+		verif_user
+		if (( $? == 0 ))
+		then
+			sudo userdel -r $USER 2> /dev/null
+			echo "L'utilisateur $USER à été supprimé."
+			echo ""
+			continue
+		else
+			echo "L'utilisateur n'éxiste pas."
+			echo ""
+			continue
+		fi
+		;;
+	#Sortie
+	0)
+		echo "Au revoir !"
+		exit 0
+		;;
+	*)
+		echo "Choix incorrect, reessayez."
+		;;
+esac
+done

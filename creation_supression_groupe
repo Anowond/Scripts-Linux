@@ -1,0 +1,79 @@
+#!/bin/bash
+
+#Fonction de vérification de l'éxistence du groupe
+verif_group () {
+GROUP=""
+while [[ ! $GROUP ]]
+do
+	read -p "Indiquez le nom du groupe : " GROUP
+	GROUP=${GROUP/ //}
+done
+cat /etc/group | cut -d: -f1 | grep $GROUP > /dev/null 
+}
+
+#Fonction d'affichage du menu
+display_menu () {
+echo "==========Gestion des Groupes==========="
+echo "1 - Ajouter un nouveau groupe"
+echo "2 - Supprimer un goupe"
+echo "0 - Quitter"
+echo "========================================"
+echo ""
+read CHOICE
+}
+
+#Traitement du choix
+while true
+do
+display_menu
+case $CHOICE in
+	#Creation d'un groupe si il n'éxiste pas déja
+	1)
+		verif_group
+		if (( $? == 1 ))
+		then
+			sudo groupadd $GROUP
+			if (( $? == 0 ))
+			then
+				echo "Le groupe $GROUP à été ajouté"
+				echo ""
+			else
+				echo "Erreur lors de la création du groupe : $? "
+			fi
+			continue
+		else
+			echo "Le groupe $GROUP éxiste déja."
+			echo ""
+			continue
+		fi
+		;;
+	#Supression d'un groupe si il éxiste
+	2)
+		verif_group
+		if (( $? == 0 ))
+		then
+			sudo groupdel $GROUP
+			if (( $? == 0 ))
+			then
+				echo "Le groupe $GROUP à été supprimé."
+				echo ""
+			else
+				echo "Erreur lors de la suppression du groupe : $? "
+			fi
+			continue
+		else
+			echo "Le groupe n'éxiste pas."
+			echo ""
+			continue
+		fi
+		;;
+	#Sortie
+	0)
+		echo "Au revoir !"
+		exit 0
+		;;
+	*)
+		echo "Choix incorrect, reessayez."
+		;;
+esac
+done
