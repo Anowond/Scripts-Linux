@@ -1,0 +1,98 @@
+#!/bin/bash
+
+#Fonction de vérification de l'éxistence du fichier
+ask_file () {
+	while true
+	do
+		read -p "Entrez un nom de fichier (relatif ou absolu) : " FILE
+		FILE=${FILE/ //}
+
+		if [[ ! $FILE ]]
+		then
+			echo "Saisie vide, reessayez."
+			continue
+		fi
+
+		return
+	done
+}
+
+#Fonction de vérification du fichier
+verif_file () {
+	FILE=$1
+	ls $FILE &> /dev/null
+}
+
+#Fonction de vérification de l'input du menu
+verif_input () {
+	while true
+	do
+		echo "======Gestion des fichiers======"
+        	echo "1 - Créer un fichier"
+        	echo "2 - Supprimer un fichier"
+        	echo "0 - Quitter"
+        	echo "================================"
+       		read INPUT
+		INPUT=${INPUT/ //}
+
+		if [[ ! $INPUT ]]
+		then
+			echo "Saisie vide, reesayez"
+			continue
+		fi
+
+		if [[ ! $INPUT =~ ^[0-2]$ ]]
+		then
+			echo "Choix incorrect, ressayez"
+			continue
+		fi
+
+		return
+	done
+}
+
+#Menu
+while true
+do
+	verif_input
+
+	case $INPUT in
+		1)
+			ask_file
+			verif_file $FILE
+			if (( $? == 0 ))
+			then
+				echo "Le fichier éxiste déja"
+				continue
+			else
+				touch $FILE
+				if (( $? == 0 ))
+				then
+					echo "Fichier $FILE créé avec succés"
+				fi
+				continue
+			fi
+			;;
+		2)
+			ask_file
+			verif_file $FILE
+			if (( $? == 0 ))
+			then
+				rm $FILE
+				if (( $? == 0 ))
+				then
+					echo "Fichier $FIlE supprimé avec succés"
+				fi
+				continue
+			else
+				echo "Le fichier n'éxiste pas"
+				continue
+			fi
+			;;
+		0)
+			echo "Au revoir !"
+			exit 0
+			;;
+	esac
+done
+
